@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投票系统</title>
+    <style>
+        .voted {
+            color: red;
+        }
+    </style>
+    <script>
+        function showAlert(message) {
+            alert(message);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var messages = document.querySelectorAll('.flashes li');
+            messages.forEach(function(message) {
+                showAlert(message.innerText);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>请选择一个文件夹进行投票:</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class=flashes>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <ul>
+        {% for folder in folders %}
+        <li class="{% if folder in voted_folders %}voted{% endif %}"><a href="{{ url_for('folder', folder_name=folder) }}">{{ folder }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('all_results') }}">查看所有投票结果</a>
+    <a href="{{ url_for('logout') }}">登出</a>
+</body>
+</html>

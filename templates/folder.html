@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投票系统</title>
+    <style>
+        .option {
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .option img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+        .option input[type="radio"] {
+            display: none;
+        }
+        .option label {
+            cursor: pointer;
+        }
+        .option input[type="radio"]:checked + label img {
+            border: 3px solid #4CAF50;
+        }
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            text-align: center;
+        }
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 2%;
+        }
+    </style>
+    <script>
+        function showAlert(message) {
+            alert(message);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var messages = document.querySelectorAll('.flashes li');
+            messages.forEach(function(message) {
+                showAlert(message.innerText);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>请选择一个选项进行投票 (文件夹 {{ folder_name }}):</h1>
+    <form id="voteForm">
+        <input type="hidden" name="folder" value="{{ folder_name }}">
+        {% for option in options %}
+        <div class="option">
+            <input type="radio" name="option" id="{{ option }}" value="{{ option }}" required>
+            <label for="{{ option }}">
+                <img src="{{ url_for('static', filename=folder_name + '/' + option) }}" alt="{{ option }}" onclick="showLightbox('{{ url_for('static', filename=folder_name + '/' + option) }}')">
+            </label>
+        </div>
+        {% endfor %}
+        <button type="submit">投票</button>
+    </form>
+
+    <!-- Lightbox -->
+    <div id="lightbox">
+        <img id="lightbox-image" src="" alt="Lightbox Image" onclick="zoomLightbox()">
+    </div>
+
+    <script>
+        var isZoomed = false;
+
+        function showLightbox(imageUrl) {
+            document.getElementById('lightbox-image').src = imageUrl;
+            document.getElementById('lightbox').style.display = 'block';
+            isZoomed = false;
+        }
+
+        function zoomLightbox() {
+            var lightboxImage = document.getElementById('lightbox-image');
+            if (isZoomed) {
+                lightboxImage.style.maxWidth = '90%';
+                lightboxImage.style.maxHeight = '90%';
+            } else {
+                lightboxImage.style.maxWidth = '100%';
+                lightboxImage.style.maxHeight = '100%';
+            }
+            isZoomed = !isZoomed;
+        }
+
+        document.getElementById('lightbox').onclick = function() {
+            this.style.display = 'none';
+        };
+
+        document.getElementById('voteForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/vote', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showAlert(data.error);
+                } else {
+                    showAlert(data.success);
+                    window.location.href = "{{ url_for('index') }}";
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <a href="{{ url_for('all_results') }}">查看所有投票结果</a>
+    <a href="{{ url_for('index') }}">返回</a>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>所有投票结果</title>
+    <script>
+        function showAlert(message) {
+            alert(message);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var messages = document.querySelectorAll('.flashes li');
+            messages.forEach(function(message) {
+                showAlert(message.innerText);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>所有投票结果:</h1>
+    <ul>
+        {% for folder, options in all_votes.items() %}
+        <li>
+            <h2>{{ folder }}</h2>
+            <ul>
+                {% for option, count in options.items() %}
+                <li>{{ option }}: {{ count }} 票</li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">返回</a>
+</body>
+</html>
